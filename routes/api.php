@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CvController;
@@ -8,33 +7,26 @@ use App\Http\Controllers\API\CoverController;
 use App\Http\Controllers\API\ApplicationController;
 use App\Http\Controllers\API\EventController;
 
-// Authentication Routes
+// Public Auth Routes
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
     Route::post('/register', 'register');
 });
 
 // Protected Routes
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
 
-// Cover letter Routes
-Route::middleware('auth:sanctum')->group(function() {
-    Route::apiResource('cover', CoverController::class);
-});
+    // Auth
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-// CV Routes
-Route::middleware('auth:sanctum')->group(function() {
-    Route::apiResource('cv', CvController::class);
-});
-
-// Application Routes
-Route::middleware('auth:sanctum')->group(function() {
-    Route::apiResource('application', ApplicationController::class);
-});
-
-// Event Routes
-Route::middleware('auth:sanctum')->group(function() {
-    Route::apiResource('event', EventController::class);
+    // Resources
+    Route::get('/dashboard', [ApplicationController::class, 'dashboard']);
+    Route::patch('/applications/{id}/status', [ApplicationController::class, 'updateStatus']);
+    Route::get('/events/upcoming', [EventController::class, 'upcoming']);
+    
+    Route::apiResource('applications', ApplicationController::class);
+    Route::apiResource('cvs', CvController::class);
+    Route::apiResource('covers', CoverController::class);
+    Route::apiResource('events', EventController::class);
 });

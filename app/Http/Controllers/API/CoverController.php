@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Requests\StoreCoverRequest;
+use App\Http\Requests\UpdateCoverRequest;
 use App\Http\Resources\CoverResource;
 use App\Models\Cover;
-use Validator;
 
 class CoverController extends BaseController
 {
@@ -16,31 +16,25 @@ class CoverController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $covers = auth()->user()->covers;
-
-        return $this->sendResponse(
-            CoverResource::collection($covers),
-            'Cover letters retrieved successfully'
-        );
+        $covers = auth()->user()->covers()->latest()->paginate(request()->get('per_page', 10));
+    
+        return $this->sendResponse([
+            'items' => CoverResource::collection($covers->items()),
+            'pagination' => [
+                'current_page' => $covers->currentPage(),
+                'last_page' => $covers->lastPage(),
+                'per_page' => $covers->perPage(),
+                'total' => $covers->total(),
+            ]
+        ], 'Cover letters retrieved successfully');
     }
 
     /**
      * Store a newly created resource in storage
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreCoverRequest $request): JsonResponse
     {
-        $input = $request->all();
-
-        $validator = Validator::make($input, [
-            'application_id' => 'nullable|exists:applications,id',
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
-        }
-
+        $input = $request->validated();
         $input['user_id'] = auth()->id();
 
         $cover = Cover::create($input);
@@ -71,25 +65,15 @@ class CoverController extends BaseController
     /**
      * Update the specified resource in storage
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateCoverRequest $request, $id): JsonResponse
     {
         $cover = auth()->user()->covers()->find($id);
 
-            if (is_null($cover)) {
-                return $this->sendError('Cover Letter not found');
+        if (is_null($cover)) {
+            return $this->sendError('Cover letter not found');
         }
 
-        $input = $request->all();
-
-        $validator = Validator::make($input, [
-            'application_id' => 'nullable|exists:applications,id',
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
-        }
+        $input = $request->validated();
 
         $cover->application_id = $input['application_id'] ?? null;
         $cover->title = $input['title'];
@@ -110,11 +94,11 @@ class CoverController extends BaseController
         $cover = auth()->user()->covers()->find($id);
 
         if (is_null($cover)) {
-            return $this->sendError('Cover Letter not found');
+            return $this->sendError('Cover letter not found');
         }
 
         $cover->delete();
 
-        return $this->sendResponse([], 'Cover Letter deleted successfully');
+        return $this->sendResponse([], 'Cover letter deleted successfully');
     }
 }

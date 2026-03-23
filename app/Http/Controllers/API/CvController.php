@@ -2,72 +2,50 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Requests\StoreCvRequest;
+use App\Http\Requests\UpdateCvRequest;
 use App\Http\Resources\CvResource;
 use App\Models\Cv;
-use Validator;
 
 class CvController extends BaseController
 {
-
     /**
      * Display a listing of the resource
-     * 
-     * @return \Illuminate\Http\Response
      */
-    public function index():JsonResponse
+    public function index(): JsonResponse
     {
-        $cvs = auth()->user()->cvs;
-
-        return $this->sendResponse(
-            CvResource::collection($cvs),
-            'CVs retrieved successfully'
-        );
+        $cvs = auth()->user()->cvs()->latest()->paginate(request()->get('per_page', 10));
+    
+        return $this->sendResponse([
+            'items' => CvResource::collection($cvs->items()),
+            'pagination' => [
+                'current_page' => $cvs->currentPage(),
+                'last_page' => $cvs->lastPage(),
+                'per_page' => $cvs->perPage(),
+                'total' => $cvs->total(),
+            ]
+        ], 'CVs retrieved successfully');
     }
 
     /**
      * Store a newly created resource in storage
-     * 
-     * @param \Illuminate\Http\Request $equest
-     * @return \Illuminate\Http\Response 
      */
-    public function store(Request $request):JsonResponse 
+    public function store(StoreCvRequest $request): JsonResponse
     {
-        $input = $request->all();
-
-        $validator = Validator::make($input, [
-            'name' => 'required',
-            'email' => 'required|email',
-            'phone' => 'required|digits_between:10,15',
-            'location' => 'nullable|string',
-            'links' => 'nullable|string',
-            'bio' => 'nullable|string',
-            'experience' => 'nullable|string',
-            'education' => 'nullable|string',
-            'skills' => 'nullable|string',
-        ]);
-
-        if($validator->fails()){
-            return $this->sendError('Validation Error',$validator->errors());
-        }
-
+        $input = $request->validated();
         $input['user_id'] = auth()->id();
 
         $cv = Cv::create($input);
 
-        return $this->sendResponse(new CvResource($cv), 'Cv created successfully');
+        return $this->sendResponse(new CvResource($cv), 'CV created successfully');
     }
 
     /**
- * Display the specified resource
- * 
- * @param int $id
- * @return \Illuminate\Http\Response
- */
-    public function show($id):JsonResponse
+     * Display the specified resource
+     */
+    public function show($id): JsonResponse
     {
         $cv = auth()->user()->cvs()->find($id);
 
@@ -82,37 +60,17 @@ class CvController extends BaseController
     }
 
     /**
- * Updatethe specified resource in storage
- * 
- * @param \Illuminate\Http\Request $request
- * @param int $id
- * @return \Illuminate\Http\Response
- */
-    public function update(Request $request, $id): JsonResponse
+     * Update the specified resource in storage
+     */
+    public function update(UpdateCvRequest $request, $id): JsonResponse
     {
         $cv = auth()->user()->cvs()->find($id);
 
-            if (is_null($cv)) {
-                return $this->sendError('CV not found');
+        if (is_null($cv)) {
+            return $this->sendError('CV not found');
         }
 
-        $input = $request->all();
-
-        $validator = Validator::make($input, [
-            'name' => 'required',
-            'email' => 'required|email',
-            'phone' => 'required|digits_between:10,15',
-            'location' => 'nullable|string',
-            'links' => 'nullable|string',
-            'bio' => 'nullable|string',
-            'experience' => 'nullable|string',
-            'education' => 'nullable|string',
-            'skills' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
-        }
+        $input = $request->validated();
 
         $cv->name = $input['name'];
         $cv->email = $input['email'];
@@ -125,16 +83,13 @@ class CvController extends BaseController
         $cv->skills = $input['skills'] ?? null;
         $cv->save();
 
-        return $this->sendResponse(new CvResource($cv), 'Cv updated successfully');
+        return $this->sendResponse(new CvResource($cv), 'CV updated successfully');
     }
 
     /**
- * Removes the specified resource in storage
- * 
- * @param int $id
- * @return \Illuminate\Http\Response
- */
-    public function destroy($id):JsonResponse
+     * Remove the specified resource from storage
+     */
+    public function destroy($id): JsonResponse
     {
         $cv = auth()->user()->cvs()->find($id);
 

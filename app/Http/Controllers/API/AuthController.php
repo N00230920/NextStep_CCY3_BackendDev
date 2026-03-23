@@ -43,6 +43,15 @@ class AuthController extends BaseController
     public function login(Request $request): JsonResponse
     {
 
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+        
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors(), 'Validation Error', 422);
+        }
+        
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
             $success['token'] = $user->createToken('NextStep')->plainTextToken;
@@ -54,5 +63,17 @@ class AuthController extends BaseController
         else {
             return $this->sendError('Unauthorized', ['error' => 'Invalid credentials.'], 401);
         }
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return $this->sendResponse([], 'Logged out successfully');
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        return $this->sendResponse($request->user(), 'User retrieved successfully');
     }
 }

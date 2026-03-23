@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
-use Validator;
 
 class EventController extends BaseController
 {
@@ -16,36 +16,28 @@ class EventController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $events = auth()->user()->events;
-
-        return $this->sendResponse(
-            EventResource::collection($events),
-            'Events retrieved successfully'
-        );
+        $events = auth()->user()->events()
+            ->orderBy('event_date')
+            ->orderBy('event_time')
+            ->paginate(request()->get('per_page', 10));
+    
+        return $this->sendResponse([
+            'items' => EventResource::collection($events->items()),
+            'pagination' => [
+                'current_page' => $events->currentPage(),
+                'last_page' => $events->lastPage(),
+                'per_page' => $events->perPage(),
+                'total' => $events->total(),
+            ]
+        ], 'Events retrieved successfully');
     }
 
     /**
      * Store a newly created resource in storage
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreEventRequest $request): JsonResponse
     {
-        $input = $request->all();
-
-        $validator = Validator::make($input, [
-            'application_id' => 'nullable|exists:applications,id',
-            'title' => 'required|string|max:255',
-            'event_type' => 'required|in:interview,reminder,assessment,call,deadline',
-            'description' => 'nullable|string',
-            'event_date' => 'required|date',
-            'is_all_day' => 'required|boolean',
-            'event_time' => 'nullable|date_format:H:i|required_if:is_all_day,false',
-            'location' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
-        }
-
+        $input = $request->validated();
         $input['user_id'] = auth()->id();
 
         if ($input['is_all_day']) {
@@ -80,29 +72,15 @@ class EventController extends BaseController
     /**
      * Update the specified resource in storage
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateEventRequest $request, $id): JsonResponse
     {
         $event = auth()->user()->events()->find($id);
 
-            if (is_null($event)) {
-                return $this->sendError('Event not found');
+        if (is_null($event)) {
+            return $this->sendError('Event not found');
         }
-        $input = $request->all();
 
-        $validator = Validator::make($input, [
-            'application_id' => 'nullable|exists:applications,id',
-            'title' => 'required|string|max:255',
-            'event_type' => 'required|in:interview,reminder,assessment,call,deadline',
-            'description' => 'nullable|string',
-            'event_date' => 'required|date',
-            'is_all_day' => 'required|boolean',
-            'event_time' => 'nullable|date_format:H:i|required_if:is_all_day,false',
-            'location' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
-        }
+        $input = $request->validated();
 
         $event->application_id = $input['application_id'] ?? null;
         $event->title = $input['title'];
@@ -118,7 +96,6 @@ class EventController extends BaseController
         }
 
         $event->location = $input['location'] ?? null;
-
         $event->save();
 
         return $this->sendResponse(
@@ -141,5 +118,20 @@ class EventController extends BaseController
         $event->delete();
 
         return $this->sendResponse([], 'Event deleted successfully');
+    }
+
+    public function upcoming(): JsonResponse
+    {
+        $events = auth()->user()->events()
+            ->whereDate('event_date', '>=', now()->toDateString())
+            ->orderBy('event_date')
+            ->orderBy('event_time')
+            ->take(10)
+            ->get();
+
+        return $this->sendResponse(
+            EventResource::collection($events),
+            'Upcoming events retrieved successfully'
+        );
     }
 }
