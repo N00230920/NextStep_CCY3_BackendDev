@@ -72,7 +72,7 @@ class AuthController extends BaseController
         return $this->sendResponse([], 'Logged out successfully');
     }
 
-    public function me(Request $request): JsonResponse
+    public function user(Request $request): JsonResponse
     {
         return $this->sendResponse($request->user(), 'User retrieved successfully');
     }

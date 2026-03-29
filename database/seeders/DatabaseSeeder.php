@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         $this ->call([
             UserSeeder::class,
             CvSeeder::class,
-            CoverSeeder::class,
             ApplicationSeeder::class,
+            CoverSeeder::class,
             EventSeeder::class,
         ]);
     }

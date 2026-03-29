@@ -10,6 +10,9 @@ class CvSeeder extends Seeder
 {
     public function run(): void
     {
-        Cv::factory()->count(10)->create();
+        Cv::factory()
+            ->count(25)
+            ->recycle(User::all())
+            ->create();
     }
 }

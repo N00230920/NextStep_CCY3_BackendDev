@@ -7,7 +7,6 @@ use App\Http\Controllers\API\BaseController as BaseController;
 use App\Http\Requests\StoreCvRequest;
 use App\Http\Requests\UpdateCvRequest;
 use App\Http\Resources\CvResource;
-use App\Models\Cv;
 
 class CvController extends BaseController
 {
@@ -34,10 +33,7 @@ class CvController extends BaseController
      */
     public function store(StoreCvRequest $request): JsonResponse
     {
-        $input = $request->validated();
-        $input['user_id'] = auth()->id();
-
-        $cv = Cv::create($input);
+        $cv = $request->user()->cvs()->create($request->validated());
 
         return $this->sendResponse(new CvResource($cv), 'CV created successfully');
     }
