@@ -11,17 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event', function (Blueprint $table) {
+        Schema::create('covers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('application_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('title', 255);
-            $table->enum('event_type', ['interview', 'reminder', 'assessment', 'call','deadline'])->nullable();
-            $table->text('description')->nullable();
-            $table->dateTime('event_date');
-            $table->boolean('is_all_day')->default(false);
-            $table->time('event_time')->nullable();
-            $table->string('location')->nullable();
+            $table->string('content');
             $table->timestamps();
         });
     }
@@ -31,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('event');
+        Schema::dropIfExists('covers');
     }
 };

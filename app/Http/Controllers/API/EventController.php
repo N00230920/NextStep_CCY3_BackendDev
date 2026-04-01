@@ -60,7 +60,7 @@ class EventController extends BaseController
         $event = auth()->user()->events()->find($id);
 
         if (is_null($event)) {
-            return $this->sendError('Event not found');
+            return $this->sendError([], 'Event not found.');
         }
 
         return $this->sendResponse(
@@ -77,7 +77,7 @@ class EventController extends BaseController
         $event = auth()->user()->events()->find($id);
 
         if (is_null($event)) {
-            return $this->sendError('Event not found');
+            return $this->sendError([], 'Event not found.');
         }
 
         $input = $request->validated();
@@ -112,7 +112,7 @@ class EventController extends BaseController
         $event = auth()->user()->events()->find($id);
 
         if (is_null($event)) {
-            return $this->sendError('Event not found');
+            return $this->sendError([], 'Event not found.');
         }
 
         $event->delete();

@@ -10,8 +10,6 @@ class Cover extends Model
 {
     use HasFactory;
 
-    protected $table = 'cover';
-
     protected $fillable = [
         'user_id',
         'application_id',

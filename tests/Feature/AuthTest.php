@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -17,9 +18,6 @@ class AuthTest extends TestCase
         parent::setUp();
         $this->seed();
     }
-    /**
-     * A basic feature test example.
-     */
 
     public function test_user_info(): void
     {
@@ -28,15 +26,19 @@ class AuthTest extends TestCase
         $response = $this->actingAs($user)->getJson('/api/user');
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'id',
-            'name',
-            'email',
-            'created_at',
-            'updated_at',
+            'success',
+            'message',
+            'data' => [
+                'id',
+                'name',
+                'email',
+                'created_at',
+                'updated_at',
+            ],
         ]);
 
-        $this->assertEquals($response->json('name'), $user->name);
-        $this->assertEquals($response->json('email'), $user->email);
+        $this->assertEquals($response->json('data.name'), $user->name);
+        $this->assertEquals($response->json('data.email'), $user->email);
     }
 
     
@@ -50,7 +52,7 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/register', $user);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
                 'token', 'name'
@@ -65,7 +67,7 @@ class AuthTest extends TestCase
         $name = $response->json('data.name');
 
         $this->assertEquals(true, $success);
-        $this->assertEquals('User registered successfully', $message);
+        $this->assertEquals('User registered successfully.', $message);
         $this->assertNotNull($token);
         $this->assertEquals($user['name'], $name);
         
@@ -83,9 +85,71 @@ class AuthTest extends TestCase
             'password' => 'password',
         ];
 
+        User::factory()->create([
+            'email' => $user['email'],
+        ]);
+
         $response = $this->postJson('/api/register', $user);
 
-        $response->assertStatus(201);
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'email'
+            ],
+        ]);
+
+        $message = $response->json('message');
+        $errors = $response->json('data.email');
+
+        $this->assertEquals('Validation Error', $message);
+        $this->assertContains('The email has already been taken.', $errors);
+    }
+
+    public function test_user_login(): void
+    {
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'token', 'name'
+            ],
+            'message',
+            'success'
+        ]);
+
+        $success = $response->json('success');
+        $message = $response->json('message');
+        $token = $response->json('data.token');
+        $name = $response->json('data.name');
+
+        $this->assertEquals(true, $success);
+        $this->assertEquals('User logged in successfully.', $message);
+        $this->assertNotNull($token);
+        $this->assertEquals($user->name, $name);
+    }
+
+    public function test_user_login_error(): void
+    {
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(401);
         $response->assertJsonStructure([
             'data',
             'message',
@@ -95,28 +159,8 @@ class AuthTest extends TestCase
         $success = $response->json('success');
         $message = $response->json('message');
 
-        $this->assertEquals($success, false);
-        $this->assertEquals($message, 'Validation Error');
-
-        $this->assertDatabaseMissing('users', [
-            'name' => $user['name'],
-            'email' => $user['email'],
-        ]);
+        $this->assertEquals(false, $success);
+        $this->assertEquals('Invalid credentials.', $message);
     }
-
-    public function test_user_login(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-
-    public function test_user_login_error(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-
 
 }

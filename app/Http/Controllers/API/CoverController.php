@@ -53,7 +53,7 @@ class CoverController extends BaseController
         $cover = auth()->user()->covers()->find($id);
 
         if (is_null($cover)) {
-            return $this->sendError('Cover letter not found');
+            return $this->sendError([], 'Cover letter not found');
         }
 
         return $this->sendResponse(
@@ -70,12 +70,14 @@ class CoverController extends BaseController
         $cover = auth()->user()->covers()->find($id);
 
         if (is_null($cover)) {
-            return $this->sendError('Cover letter not found');
+            return $this->sendError([], 'Cover letter not found');
         }
 
         $input = $request->validated();
 
-        $cover->application_id = $input['application_id'] ?? null;
+        if (array_key_exists('application_id', $input)) {
+            $cover->application_id = $input['application_id'];
+        }
         $cover->title = $input['title'];
         $cover->content = $input['content'];
         $cover->save();
@@ -94,7 +96,7 @@ class CoverController extends BaseController
         $cover = auth()->user()->covers()->find($id);
 
         if (is_null($cover)) {
-            return $this->sendError('Cover letter not found');
+            return $this->sendError([], 'Cover letter not found');
         }
 
         $cover->delete();

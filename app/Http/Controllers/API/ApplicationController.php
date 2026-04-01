@@ -73,7 +73,7 @@ class ApplicationController extends BaseController
         $application = auth()->user()->applications()->find($id);
 
         if (is_null($application)) {
-            return $this->sendError('Application not found');
+            return $this->sendError([], 'Application not found');
         }
 
         return $this->sendResponse(
@@ -90,7 +90,7 @@ class ApplicationController extends BaseController
         $application = auth()->user()->applications()->find($id);
     
         if (is_null($application)) {
-            return $this->sendError('Application not found');
+            return $this->sendError([], 'Application not found');
         }
     
         $input = $request->validated();
@@ -122,7 +122,7 @@ class ApplicationController extends BaseController
         $application = auth()->user()->applications()->find($id);
 
         if (is_null($application)) {
-            return $this->sendError('Application not found');
+            return $this->sendError([], 'Application not found');
         }
 
         $application->delete();
@@ -133,6 +133,9 @@ class ApplicationController extends BaseController
     public function dashboard(): JsonResponse
     {
         $user = auth()->user();
+        if (!$user) {
+            return $this->sendError([], 'Unauthenticated.', 401);
+        }
 
         $statusCounts = [
             'applied' => $user->applications()->where('status', 'applied')->count(),
@@ -176,7 +179,7 @@ class ApplicationController extends BaseController
         $application = auth()->user()->applications()->find($id);
 
         if (is_null($application)) {
-            return $this->sendError('Application not found');
+            return $this->sendError([], 'Application not found');
         }
 
         $application->status = $request->status;

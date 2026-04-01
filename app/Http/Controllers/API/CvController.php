@@ -46,7 +46,7 @@ class CvController extends BaseController
         $cv = auth()->user()->cvs()->find($id);
 
         if (is_null($cv)) {
-            return $this->sendError('CV not found');
+            return $this->sendError([], 'CV not found', 404);
         }
 
         return $this->sendResponse(
@@ -63,7 +63,7 @@ class CvController extends BaseController
         $cv = auth()->user()->cvs()->find($id);
 
         if (is_null($cv)) {
-            return $this->sendError('CV not found');
+            return $this->sendError([], 'CV not found', 404);
         }
 
         $input = $request->validated();
@@ -90,7 +90,7 @@ class CvController extends BaseController
         $cv = auth()->user()->cvs()->find($id);
 
         if (is_null($cv)) {
-            return $this->sendError('CV not found');
+            return $this->sendError([], 'CV not found', 404);
         }
 
         $cv->delete();

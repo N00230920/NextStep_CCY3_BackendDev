@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,9 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE `cvs` MODIFY `user_id` BIGINT UNSIGNED NOT NULL');
-        DB::statement('ALTER TABLE `cover` MODIFY `content` TEXT NOT NULL');
-        DB::statement('ALTER TABLE `event` MODIFY `event_date` DATE NOT NULL');
+        if (Schema::hasTable('cvs') && Schema::hasColumn('cvs', 'user_id')) {
+            Schema::table('cvs', function (Blueprint $table) {
+                $table->unsignedBigInteger('user_id')->nullable(false)->change();
+            });
+        }
+
+        $coverTable = Schema::hasTable('cover') ? 'cover' : (Schema::hasTable('covers') ? 'covers' : null);
+        if ($coverTable !== null && Schema::hasColumn($coverTable, 'content')) {
+            Schema::table($coverTable, function (Blueprint $table) {
+                $table->text('content')->change();
+            });
+        }
+
+        $eventTable = Schema::hasTable('event') ? 'event' : (Schema::hasTable('events') ? 'events' : null);
+        if ($eventTable !== null && Schema::hasColumn($eventTable, 'event_date')) {
+            Schema::table($eventTable, function (Blueprint $table) {
+                $table->date('event_date')->change();
+            });
+        }
 
         if (Schema::hasColumn('applications', 'stage_order')) {
             Schema::table('applications', function ($table) {
@@ -27,9 +43,25 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE `cvs` MODIFY `user_id` BIGINT UNSIGNED NULL');
-        DB::statement('ALTER TABLE `cover` MODIFY `content` VARCHAR(255) NOT NULL');
-        DB::statement('ALTER TABLE `event` MODIFY `event_date` DATETIME NOT NULL');
+        if (Schema::hasTable('cvs') && Schema::hasColumn('cvs', 'user_id')) {
+            Schema::table('cvs', function (Blueprint $table) {
+                $table->unsignedBigInteger('user_id')->nullable()->change();
+            });
+        }
+
+        $coverTable = Schema::hasTable('cover') ? 'cover' : (Schema::hasTable('covers') ? 'covers' : null);
+        if ($coverTable !== null && Schema::hasColumn($coverTable, 'content')) {
+            Schema::table($coverTable, function (Blueprint $table) {
+                $table->string('content')->change();
+            });
+        }
+
+        $eventTable = Schema::hasTable('event') ? 'event' : (Schema::hasTable('events') ? 'events' : null);
+        if ($eventTable !== null && Schema::hasColumn($eventTable, 'event_date')) {
+            Schema::table($eventTable, function (Blueprint $table) {
+                $table->dateTime('event_date')->change();
+            });
+        }
 
         if (! Schema::hasColumn('applications', 'stage_order')) {
             Schema::table('applications', function ($table) {
