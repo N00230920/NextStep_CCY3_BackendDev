@@ -173,7 +173,7 @@ class ApplicationController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return $this->sendError('Validation Error', $validator->errors());
+            return $this->sendError($validator->errors(), 'Validation Error', 422);
         }
 
         $application = auth()->user()->applications()->find($id);

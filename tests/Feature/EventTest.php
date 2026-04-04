@@ -314,4 +314,23 @@ class EventTest extends TestCase
             'message' => 'Event not found.',
         ]);
     }
+
+    public function test_event_store_rejects_application_from_another_user(): void
+    {
+        $owner = User::factory()->create();
+        $foreignApplication = Application::factory()->create(['user_id' => $owner->id]);
+        $this->authenticateUser();
+
+        $response = $this->postJson('/api/events', [
+            'application_id' => $foreignApplication->id,
+            'title' => 'Cross-tenant interview',
+            'event_type' => 'interview',
+            'event_date' => now()->addDay()->toDateString(),
+            'is_all_day' => false,
+            'event_time' => '10:00',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['application_id']);
+    }
 }

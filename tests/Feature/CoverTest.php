@@ -246,4 +246,20 @@ class CoverTest extends TestCase
         ]);
     }
 
+    public function test_cover_store_rejects_application_from_another_user(): void
+    {
+        $owner = User::factory()->create();
+        $foreignApplication = Application::factory()->create(['user_id' => $owner->id]);
+        $this->authenticateUser();
+
+        $response = $this->postJson('/api/covers', [
+            'application_id' => $foreignApplication->id,
+            'title' => 'Tenant boundary test',
+            'content' => 'This should fail when foreign application IDs are provided.',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['application_id']);
+    }
+
 }

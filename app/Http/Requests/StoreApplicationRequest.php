@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreApplicationRequest extends FormRequest
 {
@@ -14,7 +15,7 @@ class StoreApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cv_id' => 'nullable|exists:cvs,id',
+            'cv_id' => ['nullable',Rule::exists('cvs', 'id')->where(fn ($q) => $q->where('user_id', $this->user()->id)),], // Ensure the CV belongs to the authenticated user
             'company_name' => 'required|string|max:255',
             'position' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
