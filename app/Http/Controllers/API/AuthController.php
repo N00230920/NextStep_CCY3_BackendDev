@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Mail\WelcomeMail;
+use Illuminate\Support\Facades\Mail;
 
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\User;
@@ -36,6 +38,7 @@ class AuthController extends BaseController
         $user = User::create($input);
         $success['token'] = $user->createToken('NextStep')->plainTextToken;
         $success['name'] = $user->name;
+        Mail::to($user->email)->queue(new WelcomeMail($user));  
 
         return $this->sendResponse($success, 'User registered successfully.');
     }
