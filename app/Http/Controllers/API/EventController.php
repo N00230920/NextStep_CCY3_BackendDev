@@ -16,19 +16,10 @@ class EventController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $events = auth()->user()->events()
-            ->orderBy('event_date')
-            ->orderBy('event_time')
-            ->paginate(request()->get('per_page', 10));
+        $events = auth()->user()->events()->get();
     
         return $this->sendResponse([
-            'items' => EventResource::collection($events->items()),
-            'pagination' => [
-                'current_page' => $events->currentPage(),
-                'last_page' => $events->lastPage(),
-                'per_page' => $events->perPage(),
-                'total' => $events->total(),
-            ]
+            'items' => EventResource::collection($events),
         ], 'Events retrieved successfully');
     }
 
@@ -118,20 +109,5 @@ class EventController extends BaseController
         $event->delete();
 
         return $this->sendResponse([], 'Event deleted successfully');
-    }
-
-    public function upcoming(): JsonResponse
-    {
-        $events = auth()->user()->events()
-            ->whereDate('event_date', '>=', now()->toDateString())
-            ->orderBy('event_date')
-            ->orderBy('event_time')
-            ->take(10)
-            ->get();
-
-        return $this->sendResponse(
-            EventResource::collection($events),
-            'Upcoming events retrieved successfully'
-        );
     }
 }

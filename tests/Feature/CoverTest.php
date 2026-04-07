@@ -45,12 +45,6 @@ class CoverTest extends TestCase
                         'updated_at',
                     ],
                 ],
-                'pagination' => [
-                    'current_page',
-                    'last_page',
-                    'per_page',
-                    'total',
-                ],
             ],
         ]);
     }

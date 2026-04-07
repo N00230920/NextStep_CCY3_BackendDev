@@ -23,30 +23,10 @@ class ApplicationController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $query = auth()->user()->applications();
-    
-        if (request()->has('status') && request('status') !== '') {
-            $query->where('status', request('status'));
-        }
-    
-        if (request()->has('job_type') && request('job_type') !== '') {
-            $query->where('job_type', request('job_type'));
-        }
-    
-        if (request()->has('company_name') && request('company_name') !== '') {
-            $query->where('company_name', 'like', '%' . request('company_name') . '%');
-        }
-    
-        $applications = $query->latest()->paginate(request()->get('per_page', 10));
+        $applications = auth()->user()->applications()->get();
     
         return $this->sendResponse([
-            'items' => ApplicationResource::collection($applications->items()),
-            'pagination' => [
-                'current_page' => $applications->currentPage(),
-                'last_page' => $applications->lastPage(),
-                'per_page' => $applications->perPage(),
-                'total' => $applications->total(),
-            ]
+            'items' => ApplicationResource::collection($applications),
         ], 'Applications retrieved successfully');
     }
     /**

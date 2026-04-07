@@ -16,16 +16,10 @@ class CoverController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $covers = auth()->user()->covers()->latest()->paginate(request()->get('per_page', 10));
+        $covers = auth()->user()->covers()->get();
     
         return $this->sendResponse([
-            'items' => CoverResource::collection($covers->items()),
-            'pagination' => [
-                'current_page' => $covers->currentPage(),
-                'last_page' => $covers->lastPage(),
-                'per_page' => $covers->perPage(),
-                'total' => $covers->total(),
-            ]
+            'items' => CoverResource::collection($covers),
         ], 'Cover letters retrieved successfully');
     }
 

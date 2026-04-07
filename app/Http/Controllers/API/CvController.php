@@ -15,16 +15,10 @@ class CvController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $cvs = auth()->user()->cvs()->latest()->paginate(request()->get('per_page', 10));
+        $cvs = auth()->user()->cvs()->get();
     
         return $this->sendResponse([
-            'items' => CvResource::collection($cvs->items()),
-            'pagination' => [
-                'current_page' => $cvs->currentPage(),
-                'last_page' => $cvs->lastPage(),
-                'per_page' => $cvs->perPage(),
-                'total' => $cvs->total(),
-            ]
+            'items' => CvResource::collection($cvs),
         ], 'CVs retrieved successfully');
     }
 
