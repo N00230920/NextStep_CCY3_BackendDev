@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CvController;
 use App\Http\Controllers\API\CoverController;
 use App\Http\Controllers\API\ApplicationController;
+use App\Http\Controllers\API\CvAiController;
 use App\Http\Controllers\API\EventController;
 
 // Public Auth Routes
@@ -22,11 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Resources
     Route::get('/dashboard', [ApplicationController::class, 'dashboard']);
-    Route::patch('/applications/{id}/status', [ApplicationController::class, 'updateStatus']);
-    Route::get('/events/upcoming', [EventController::class, 'upcoming']);
     
     Route::apiResource('applications', ApplicationController::class);
     Route::apiResource('cvs', CvController::class);
+    Route::post('/cvs/{cv}/chat', [CvAiController::class, 'chat']);
     Route::apiResource('covers', CoverController::class);
     Route::apiResource('events', EventController::class);
 });

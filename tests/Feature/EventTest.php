@@ -317,7 +317,7 @@ class EventTest extends TestCase
 
         $response = $this->postJson('/api/events', [
             'application_id' => $foreignApplication->id,
-            'title' => 'Cross-tenant interview',
+            'title' => 'Ux interview',
             'event_type' => 'interview',
             'event_date' => now()->addDay()->toDateString(),
             'is_all_day' => false,
