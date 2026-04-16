@@ -7,6 +7,7 @@ use App\Http\Controllers\API\CoverController;
 use App\Http\Controllers\API\ApplicationController;
 use App\Http\Controllers\API\CvAiController;
 use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\FileUploadController;
 
 // Public Auth Routes
 Route::controller(AuthController::class)->group(function () {
@@ -29,4 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cvs/{cv}/chat', [CvAiController::class, 'chat']);
     Route::apiResource('covers', CoverController::class);
     Route::apiResource('events', EventController::class);
+
+    Route::post('/upload', [FileUploadController::class, 'fileUpload']);
+
 });
