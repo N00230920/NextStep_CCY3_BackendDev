@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('applications', ApplicationController::class);
     Route::apiResource('cvs', CvController::class);
-    Route::post('/cvs/{cv}/chat', [CvAiController::class, 'chat']);
+    Route::post('/cvs/{cv_id}/chat', [CvAiController::class, 'chat']);
     Route::apiResource('covers', CoverController::class);
     Route::apiResource('events', EventController::class);
 
