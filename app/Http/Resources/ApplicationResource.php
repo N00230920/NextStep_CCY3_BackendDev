@@ -27,6 +27,7 @@ class ApplicationResource extends JsonResource
             'job_type' => $this->job_type,
             'job_url' => $this->job_url,
             'notes' => $this->notes,
+            'events' => EventResource::collection($this->events),
             'applied_date' => $this->applied_date ? $this->applied_date->format('d/m/y') : null,
             'created_at' => $this->created_at->format('d/m/y'),
             'updated_at' => $this->updated_at->format('d/m/y'),

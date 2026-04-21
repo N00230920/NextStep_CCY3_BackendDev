@@ -18,6 +18,7 @@ class EventResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'application_id' => $this->application_id,
+            'company_name' => isset($this->application) ? $this->application->company_name : null,
             'title' => $this->title,
             'event_type' => $this->event_type,
             'description' => $this->description,
