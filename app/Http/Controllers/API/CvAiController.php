@@ -6,20 +6,20 @@ use App\Ai\Agents\CvBuilder;
 use App\Models\Cv;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Laravel\Ai\Files;
 
 class CvAiController extends BaseController
 {
     /**
      * Chat with the CV builder assistant about a specific CV.
-     *
-     * On the first message (no conversation_id), the CV data is injected as context.
-     * On follow-up messages, pass the conversation_id to continue the conversation.
      */
     public function chat(Request $request, $cv_id): JsonResponse
     {
         $request->validate([
             'message' => 'required|string|max:2000',
             'conversation_id' => 'nullable|string',
+            'cv_file' => 'nullable|file|mimes:pdf,doc,docx,txt|max:5120',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $cv = auth()->user()->cvs()->find($cv_id);
@@ -31,14 +31,26 @@ class CvAiController extends BaseController
         $agent = CvBuilder::make();
 
         if ($request->conversation_id) {
-            $agent->continue($request->conversation_id, auth()->user());
+            $agent->continue($request->conversation_id, auth()->user()); 
+            // Continue the conversation with the provided ID and user context
             $prompt = $request->message;
         } else {
-            $agent->forUser(auth()->user());
+            $agent->forUser(auth()->user()); 
+            // Start a new conversation for the user (forUser) and inject CV context in the initial prompt
             $prompt = $this->buildInitialPrompt($cv, $request->message);
         }
 
-        $response = $agent->prompt($prompt);
+        $attachments = [];
+
+        if ($request->hasFile('cv_file')) {
+            $attachments[] = Files\Document::fromPath($request->file('cv_file')->getRealPath());
+        }
+
+        if ($request->hasFile('image')) {
+            $attachments[] = Files\Image::fromPath($request->file('image')->getRealPath());
+        }
+
+        $response = $agent->prompt($prompt, attachments: $attachments);
 
         return $this->sendResponse([
             'message' => $response->text(),
