@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('application_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('application_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title', 255);
             $table->enum('event_type', ['interview', 'reminder', 'assessment', 'call','deadline'])->nullable();
             $table->text('description')->nullable();
