@@ -42,10 +42,12 @@ class CvAiController extends BaseController
 
         $attachments = [];
 
+        // If a CV file is uploaded, add it as an attachment for the agent to analyze
         if ($request->hasFile('cv_file')) {
             $attachments[] = Files\Document::fromPath($request->file('cv_file')->getRealPath());
         }
 
+        // If an image is uploaded, add it as an attachment for the agent to analyze
         if ($request->hasFile('image')) {
             $attachments[] = Files\Image::fromPath($request->file('image')->getRealPath());
         }
@@ -103,6 +105,7 @@ class CvAiController extends BaseController
             $parts[] = "Skills:\n{$cv->skills}";
         }
 
+        // implode is used to join the different sections of the CV with double newlines for readability
         return implode("\n\n", $parts);
     }
 }

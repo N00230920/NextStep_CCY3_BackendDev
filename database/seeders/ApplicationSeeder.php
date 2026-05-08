@@ -11,6 +11,7 @@ class ApplicationSeeder extends Seeder
 {
     public function run(): void
     {
+        // Create 25 applications, recycling existing users and CVs to associate with the applications
         Application::factory()
             ->count(25)
             ->recycle(User::all())

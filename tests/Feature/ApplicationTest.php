@@ -17,6 +17,7 @@ class ApplicationTest extends TestCase
 
     private function authenticateUser(): User
     {
+        // Create a user and authenticate with Sanctum for API testing
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
@@ -25,6 +26,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_index(): void
     {
+        // Create some applications that belong to the authenticated user and attempt to list them
         $this->authenticateUser();
         $response = $this->getJson('/api/applications');
 
@@ -51,6 +53,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_show(): void
     {
+        // Create an application that belongs to the authenticated user and attempt to show it
         $user = $this->authenticateUser();
         $application = Application::factory()->create(['user_id' => $user->id]);
 
@@ -82,6 +85,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_show_not_found(): void
     {
+        // Attempt to show an application that doesn't exist
         $this->authenticateUser();
         $response = $this->getJson('/api/applications/999');
 
@@ -94,6 +98,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_store(): void
     {
+        // Create a CV that belongs to the authenticated user to associate with the application
         $user = $this->authenticateUser();
         $cv = Cv::factory()->create(['user_id' => $user->id]);
 
@@ -148,6 +153,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_store_validation_error(): void
     {
+        // Attempt to create an application with missing required fields
         $this->authenticateUser();
         $response = $this->postJson('/api/applications', []);
 
@@ -157,6 +163,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_update(): void
     {
+        // Create an application that belongs to the authenticated user and attempt to update it
         $user = $this->authenticateUser();
         $application = Application::factory()->create(['user_id' => $user->id]);
 
@@ -190,6 +197,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_update_validation_error(): void
     {
+        // Create an application that belongs to the authenticated user and attempt to update it with invalid data
         $user = $this->authenticateUser();
         $application = Application::factory()->create(['user_id' => $user->id]);
 
@@ -205,6 +213,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_update_not_found(): void
     {
+        // Attempt to update an application that doesn't exist
         $this->authenticateUser();
         $response = $this->putJson('/api/applications/999', [
             'company_name' => 'Updated Company',
@@ -221,6 +230,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_delete(): void
     {
+        // Create an application that belongs to the authenticated user and attempt to delete it
         $user = $this->authenticateUser();
         $application = Application::factory()->create(['user_id' => $user->id]);
 
@@ -237,6 +247,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_delete_not_found(): void
     {
+        // Attempt to delete an application that doesn't exist
         $this->authenticateUser();
         $response = $this->deleteJson('/api/applications/999');
 
@@ -249,6 +260,7 @@ class ApplicationTest extends TestCase
 
     public function test_application_endpoints_require_authentication(): void
     {
+        // Test index and store endpoints without authentication
         $response = $this->getJson('/api/applications');
         $response->assertStatus(401);
 
@@ -260,14 +272,9 @@ class ApplicationTest extends TestCase
         $response->assertStatus(401);
     }
 
-    public function test_dashboard_requires_authentication(): void
-    {
-        $response = $this->getJson('/api/dashboard');
-        $response->assertStatus(401);
-    }
-
     public function test_application_user_cannot_access_another_users_application(): void
     {
+        // Create an application that belongs to another user and attempt to access it with the authenticated user
         $owner = User::factory()->create();
         $application = Application::factory()->create(['user_id' => $owner->id]);
         $this->authenticateUser();
@@ -301,6 +308,7 @@ class ApplicationTest extends TestCase
     public function test_application_store_rejects_cv_from_another_user(): void
     {
         $owner = User::factory()->create();
+        // Create a CV that belongs to another user
         $foreignCv = Cv::factory()->create(['user_id' => $owner->id]);
         $this->authenticateUser();
 

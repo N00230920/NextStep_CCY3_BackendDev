@@ -14,6 +14,7 @@ class CoverSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create 25 covers, recycling existing users and applications to associate with the covers
         Cover::factory()
             ->count(25)
             ->recycle(User::all())

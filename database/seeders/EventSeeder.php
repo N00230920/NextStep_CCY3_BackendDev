@@ -14,6 +14,7 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create 25 events, recycling existing users and applications to associate with the events
         Event::factory()
             ->count(25)
             ->recycle(User::all())

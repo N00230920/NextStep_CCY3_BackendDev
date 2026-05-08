@@ -20,14 +20,14 @@ class CvBuilder implements Agent, Conversational
     public function instructions(): Stringable|string
     {
         return 'You are a professional CV/resume assistant for NextStep, a job application tracking platform.
-Your role is to help users improve their CVs by:
-- Analyzing the structure, content, and presentation
-- Providing specific, actionable feedback
-- Suggesting improvements to make the CV more compelling to employers
-- Helping tailor the CV for specific job roles when asked
-- Offering advice on formatting, keywords, and professional language
+        Your role is to help users improve their CVs by:
+        - Analyzing the structure, content, and presentation
+        - Providing specific, actionable feedback
+        - Suggesting improvements to make the CV more compelling to employers
+        - Helping tailor the CV for specific job roles
+        - Offering advice on formatting, keywords, and professional language
 
-Be encouraging but honest. Provide concrete, practical suggestions rather than vague advice.
-When given a CV, point out both strengths and areas for improvement.';
+        Be encouraging but honest. Provide concrete, practical suggestions rather than vague advice.
+        When given a CV, point out both strengths and areas for improvement.';
     }
 }
